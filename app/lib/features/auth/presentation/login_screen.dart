@@ -154,6 +154,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               final headerHeight = screenHeight - whiteHeight;
               final logoHeight =
                   (headerHeight * 1.25).clamp(240.0, 360.0).toDouble();
+              final logoTopOffset = -(logoHeight - headerHeight) * 0.35;
 
               return Stack(
                 clipBehavior: Clip.none,
@@ -363,27 +364,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       height: headerHeight,
                       child: FadeTransition(
                         opacity: _fadeAnimation,
-                        child: OverflowBox(
-                          alignment: Alignment.topCenter,
-                          maxHeight: headerHeight + 160,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              UniHubLogo(
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Positioned(
+                              top: logoTopOffset,
+                              left: 0,
+                              right: 0,
+                              child: UniHubLogo(
                                 variant: UniHubLogoVariant.vertical,
                                 height: logoHeight,
                                 forceLight: true,
                               ),
-                              const SizedBox(height: 12),
-                              Text(
+                            ),
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 8,
+                              child: Text(
                                 'Connect with campus life',
+                                textAlign: TextAlign.center,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: Colors.white.withOpacity(0.85),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
