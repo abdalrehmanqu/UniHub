@@ -154,7 +154,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               final headerHeight = screenHeight - whiteHeight;
               final logoHeight =
                   (headerHeight * 1.25).clamp(240.0, 360.0).toDouble();
-              final logoTopOffset = -(logoHeight - headerHeight) * 0.35;
+              final logoTopOffset = -(logoHeight - headerHeight) * 0.25 + 8;
 
               return Stack(
                 clipBehavior: Clip.none,
@@ -380,7 +380,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             Positioned(
                               left: 0,
                               right: 0,
-                              bottom: 8,
+                              bottom: 30,
                               child: Text(
                                 'Connect with campus life',
                                 textAlign: TextAlign.center,

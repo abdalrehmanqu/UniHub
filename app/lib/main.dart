@@ -31,6 +31,7 @@ class UniHubApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'UniHub',
       theme: AppTheme.light(),
+      debugShowCheckedModeBanner: false,
       routerConfig: router,
     );
   }
