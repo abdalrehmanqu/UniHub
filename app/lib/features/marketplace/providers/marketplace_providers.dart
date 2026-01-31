@@ -38,3 +38,32 @@ enum MarketplaceViewMode { grid, list }
 final marketplaceViewModeProvider = StateProvider<MarketplaceViewMode>((ref) {
   return MarketplaceViewMode.grid;
 });
+
+enum MarketplaceSort { newest, oldest, priceLowHigh, priceHighLow }
+
+final marketplaceSortProvider = StateProvider<MarketplaceSort>((ref) {
+  return MarketplaceSort.newest;
+});
+
+class MarketplaceFilters {
+  const MarketplaceFilters({
+    this.minPrice,
+    this.maxPrice,
+    this.onlyWithImages = false,
+  });
+
+  final double? minPrice;
+  final double? maxPrice;
+  final bool onlyWithImages;
+
+  bool get isActive =>
+      minPrice != null || maxPrice != null || onlyWithImages == true;
+}
+
+final marketplaceFiltersProvider = StateProvider<MarketplaceFilters>((ref) {
+  return const MarketplaceFilters();
+});
+
+final marketplaceSearchQueryProvider = StateProvider<String>((ref) {
+  return '';
+});
