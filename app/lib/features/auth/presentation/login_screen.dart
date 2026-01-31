@@ -140,7 +140,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFCC5C2E), Color(0xFFE0894E), Color(0xFFF0B36D)],
+            colors: [Color(0xFF6A1830), Color(0xFF7B1E3A), Color(0xFFB85A74)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -278,14 +278,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
                                         colors: [
-                                          Color(0xFFCC5C2E),
-                                          Color(0xFFE07A3F),
+                                          Color(0xFF7B1E3A),
+                                          Color(0xFF9A2E4D),
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(30),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFFCC5C2E)
+                                          color: const Color(0xFF7B1E3A)
                                               .withOpacity(0.25),
                                           blurRadius: 12,
                                           offset: const Offset(0, 6),

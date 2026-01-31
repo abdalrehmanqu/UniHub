@@ -74,36 +74,35 @@ class AppShell extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
               child: SizedBox(
                 height: 44,
-                child: Stack(
-                  alignment: Alignment.center,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: OverflowBox(
-                        alignment: Alignment.centerLeft,
-                        maxHeight: 120,
-                        child: const UniHubLogo(
-                          variant: UniHubLogoVariant.horizontal,
-                          height: 82,
-                        ),
+                    SizedBox(
+                      height: 24,
+                      child: Image.network(
+                        'https://omrwuqfyiyixnpvvrywi.supabase.co/storage/v1/object/public/branding/unihub_icon_black_transparent.png',
+                        fit: BoxFit.contain,
                       ),
                     ),
-                    Text(
-                      title,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onBackground,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 21,
+                          color: theme.colorScheme.onBackground,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (showAdd)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          icon: const Icon(Icons.add_rounded, size: 28),
-                          onPressed: () {},
-                          tooltip: 'Create',
-                          color: theme.colorScheme.secondary,
-                        ),
+                      IconButton(
+                        icon: const Icon(Icons.add_rounded, size: 28),
+                        onPressed: () {},
+                        tooltip: 'Create',
+                        color: theme.colorScheme.primary,
                       ),
                   ],
                 ),
@@ -113,24 +112,38 @@ class AppShell extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        bottom: false,
-        child: SizedBox(
-          height: 80,
-          child: NavigationBar(
-            selectedIndex: currentIndex,
-            onDestinationSelected: (index) => _onDestinationSelected(context, index),
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-            destinations: const [
-              NavigationDestination(icon: Icon(Icons.home_filled), label: 'Campus'),
-              NavigationDestination(icon: Icon(Icons.forum_rounded), label: 'Community'),
-              NavigationDestination(
-                icon: Icon(Icons.storefront_rounded),
-                label: 'Market',
-              ),
-              NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
-            ],
+      bottomNavigationBar: ColoredBox(
+        color: theme.colorScheme.background,
+        child: SafeArea(
+          top: false,
+          bottom: true,
+          child: SizedBox(
+            height: 56,
+            child: NavigationBar(
+              height: 56,
+              selectedIndex: currentIndex,
+              onDestinationSelected: (index) =>
+                  _onDestinationSelected(context, index),
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.home_filled),
+                  label: 'Campus',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.forum_rounded),
+                  label: 'Community',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.storefront_rounded),
+                  label: 'Market',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person),
+                  label: 'Profile',
+                ),
+              ],
+            ),
           ),
         ),
       ),

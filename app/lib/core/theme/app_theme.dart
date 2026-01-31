@@ -7,9 +7,9 @@ class AppTheme {
   static ThemeData light() {
     const colorScheme = ColorScheme(
       brightness: Brightness.light,
-      primary: Color(0xFFDD6E42),
+      primary: Color(0xFF7B1E3A),
       onPrimary: Colors.white,
-      primaryContainer: Color(0xFFFFD5C4),
+      primaryContainer: Color(0xFFF2CBD6),
       onPrimaryContainer: Color(0xFF3D1A10),
       secondary: Color(0xFFF4A261),
       onSecondary: Color(0xFF3A2515),
@@ -35,7 +35,7 @@ class AppTheme {
       scrim: Color(0x55000000),
       inverseSurface: Color(0xFF3A2C24),
       onInverseSurface: Color(0xFFFFF7F2),
-      inversePrimary: Color(0xFFF4A261),
+      inversePrimary: Color(0xFFB85A74),
     );
 
     final textTheme = GoogleFonts.lexendTextTheme();
@@ -56,15 +56,16 @@ class AppTheme {
         iconTheme: IconThemeData(color: colorScheme.onBackground),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: colorScheme.surface,
-        indicatorColor: colorScheme.primaryContainer,
+        backgroundColor: colorScheme.background,
+        indicatorColor: Colors.transparent,
         labelTextStyle: MaterialStateProperty.all(
           textTheme.labelMedium?.copyWith(color: colorScheme.onSurface),
         ),
         iconTheme: MaterialStateProperty.resolveWith((states) {
           final isSelected = states.contains(MaterialState.selected);
           return IconThemeData(
-            color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+            color: isSelected ? colorScheme.primary : const Color(0xFF8C8C8C),
+            size: 26,
           );
         }),
       ),

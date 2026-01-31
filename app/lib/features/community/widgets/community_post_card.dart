@@ -12,8 +12,16 @@ class CommunityPostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final borderColor = theme.colorScheme.outlineVariant.withOpacity(0.55);
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 12),
+      color: theme.colorScheme.background,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: borderColor),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
