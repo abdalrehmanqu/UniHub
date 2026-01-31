@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/marketplace/providers/marketplace_providers.dart';
 import '../../features/profile/providers/profile_providers.dart';
-import 'unihub_logo.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({
@@ -64,7 +64,23 @@ class AppShell extends ConsumerWidget {
     final isStudent = roleValue == 'student';
     final isCampus = location.startsWith('/campus');
     final isCommunity = location.startsWith('/community');
+    final isMarketplace = location.startsWith('/marketplace');
     final showAdd = (isAdmin && isCampus) || (isStudent && isCommunity);
+    final viewMode = isMarketplace
+        ? ref.watch(marketplaceViewModeProvider)
+        : MarketplaceViewMode.grid;
+    final isGrid = viewMode == MarketplaceViewMode.grid;
+    final toggleActiveColor = theme.colorScheme.primary;
+    final toggleInactiveColor = theme.colorScheme.surfaceVariant;
+    final toggleActiveIconColor = theme.colorScheme.onPrimary;
+    final toggleInactiveIconColor = theme.colorScheme.onSurfaceVariant;
+    const toggleWidth = 78.0;
+    const toggleHeight = 34.0;
+    const togglePadding = 3.0;
+    const toggleIconSize = 18.0;
+    final toggleSegmentWidth =
+        (toggleWidth - (togglePadding * 2)) / 2;
+    const toggleAnimation = Duration(milliseconds: 180);
 
     return Scaffold(
       body: SafeArea(
@@ -97,12 +113,92 @@ class AppShell extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (showAdd)
-                      IconButton(
-                        icon: const Icon(Icons.add_rounded, size: 28),
-                        onPressed: () {},
-                        tooltip: 'Create',
-                        color: theme.colorScheme.primary,
+                    if (isMarketplace || showAdd)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isMarketplace)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: GestureDetector(
+                                onTap: () {
+                                  ref
+                                      .read(marketplaceViewModeProvider.notifier)
+                                      .state = isGrid
+                                      ? MarketplaceViewMode.list
+                                      : MarketplaceViewMode.grid;
+                                },
+                                child: AnimatedContainer(
+                                  duration: toggleAnimation,
+                                  width: toggleWidth,
+                                  height: toggleHeight,
+                                  padding: const EdgeInsets.all(togglePadding),
+                                  decoration: BoxDecoration(
+                                    color: toggleInactiveColor,
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      AnimatedAlign(
+                                        duration: toggleAnimation,
+                                        curve: Curves.easeOutCubic,
+                                        alignment: isGrid
+                                            ? Alignment.centerLeft
+                                            : Alignment.centerRight,
+                                        child: Container(
+                                          width: toggleSegmentWidth,
+                                          height: toggleHeight - (togglePadding * 2),
+                                          decoration: BoxDecoration(
+                                            color: toggleActiveColor,
+                                            borderRadius: BorderRadius.circular(999),
+                                          ),
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SizedBox(
+                                              width: toggleSegmentWidth,
+                                              child: Center(
+                                                child: Icon(
+                                                  Icons.grid_view_rounded,
+                                                  size: toggleIconSize,
+                                                  color: isGrid
+                                                      ? toggleActiveIconColor
+                                                      : toggleInactiveIconColor,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: toggleSegmentWidth,
+                                              child: Center(
+                                                child: Icon(
+                                                  Icons.view_list_rounded,
+                                                  size: toggleIconSize,
+                                                  color: isGrid
+                                                      ? toggleInactiveIconColor
+                                                      : toggleActiveIconColor,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (showAdd)
+                            IconButton(
+                              icon: const Icon(Icons.add_rounded, size: 28),
+                              onPressed: () {},
+                              tooltip: 'Create',
+                              color: theme.colorScheme.primary,
+                            ),
+                        ],
                       ),
                   ],
                 ),

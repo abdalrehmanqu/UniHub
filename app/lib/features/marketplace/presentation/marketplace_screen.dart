@@ -11,6 +11,8 @@ class MarketplaceScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final listings = ref.watch(marketplaceListingsProvider);
+    final viewMode = ref.watch(marketplaceViewModeProvider);
+    final isGrid = viewMode == MarketplaceViewMode.grid;
 
     return Scaffold(
       body: SafeArea(
@@ -25,17 +27,27 @@ class MarketplaceScreen extends ConsumerWidget {
             return LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth > 700;
-                final crossAxisCount = isWide ? 3 : 2;
-                return GridView.builder(
+                if (isGrid) {
+                  final crossAxisCount = isWide ? 3 : 2;
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(20),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.78,
+                    ),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) =>
+                        ListingCard(listing: items[index]),
+                  );
+                }
+                return ListView.separated(
                   padding: const EdgeInsets.all(20),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.78,
-                  ),
                   itemCount: items.length,
-                  itemBuilder: (context, index) => ListingCard(listing: items[index]),
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) =>
+                      ListingCard(listing: items[index]),
                 );
               },
             );

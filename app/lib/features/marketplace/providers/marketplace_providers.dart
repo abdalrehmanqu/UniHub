@@ -32,3 +32,9 @@ final marketplaceListingsProvider = AutoDisposeAsyncNotifierProvider<
     List<MarketplaceListing>>(
   RealtimeMarketplaceNotifier.new,
 );
+
+enum MarketplaceViewMode { grid, list }
+
+final marketplaceViewModeProvider = StateProvider<MarketplaceViewMode>((ref) {
+  return MarketplaceViewMode.grid;
+});
