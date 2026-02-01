@@ -1,6 +1,7 @@
 class CommunityPost {
   const CommunityPost({
     required this.id,
+    required this.authorId,
     required this.authorName,
     required this.title,
     required this.content,
@@ -10,9 +11,11 @@ class CommunityPost {
     this.tags = const [],
     this.upvotes = 0,
     this.commentCount = 0,
+    this.isSaved = false,
   });
 
   final String id;
+  final String authorId;
   final String authorName;
   final String? authorAvatarUrl;
   final String title;
@@ -22,6 +25,24 @@ class CommunityPost {
   final int upvotes;
   final int commentCount;
   final DateTime createdAt;
+  final bool isSaved;
+
+  CommunityPost copyWith({bool? isSaved}) {
+    return CommunityPost(
+      id: id,
+      authorId: authorId,
+      authorName: authorName,
+      title: title,
+      content: content,
+      createdAt: createdAt,
+      authorAvatarUrl: authorAvatarUrl,
+      mediaUrl: mediaUrl,
+      tags: tags,
+      upvotes: upvotes,
+      commentCount: commentCount,
+      isSaved: isSaved ?? this.isSaved,
+    );
+  }
 
   factory CommunityPost.fromJson(Map<String, dynamic> json) {
     final profile = json['profiles'] as Map<String, dynamic>?;
@@ -35,6 +56,7 @@ class CommunityPost {
 
     return CommunityPost(
       id: (json['id'] ?? '').toString(),
+      authorId: (json['author_id'] ?? '').toString(),
       authorName: displayName?.isNotEmpty == true
           ? displayName!
           : (username?.isNotEmpty == true ? username! : 'Student'),

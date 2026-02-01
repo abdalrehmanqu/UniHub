@@ -39,6 +39,13 @@ dependencies:
   go_router: ^14.2.0
   google_fonts: ^6.2.1
   flutter_dotenv: ^5.1.0
+  image_picker: ^1.0.7
+  lucide_icons: ^0.257.0
+  flutter_quill: ^11.5.0
+  video_player: ^2.10.1
+  visibility_detector: ^0.4.0+2
+  any_link_preview: ^3.0.3
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

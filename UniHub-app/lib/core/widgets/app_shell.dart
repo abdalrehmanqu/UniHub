@@ -225,7 +225,13 @@ class AppShell extends ConsumerWidget {
                           if (showAdd)
                             IconButton(
                               icon: const Icon(Icons.add_rounded, size: 28),
-                              onPressed: () {},
+                              onPressed: () {
+                                if (isCampus) {
+                                  context.push('/campus/create');
+                                } else if (isCommunity) {
+                                  context.push('/community/create');
+                                }
+                              },
                               tooltip: 'Create',
                               color: theme.colorScheme.primary,
                             ),

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +11,9 @@ import 'core/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (!kIsWeb) {
+    HttpOverrides.global = _PreviewHttpOverrides();
+  }
   try {
     await dotenv.load(fileName: '.env');
   } catch (_) {}
@@ -20,6 +26,17 @@ Future<void> main() async {
   }
 
   runApp(const ProviderScope(child: UniHubApp()));
+}
+
+class _PreviewHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    final client = super.createHttpClient(context);
+    client.badCertificateCallback = (cert, host, port) {
+      return host == 'qu.edu.qa' || host.endsWith('.qu.edu.qa');
+    };
+    return client;
+  }
 }
 
 class UniHubApp extends ConsumerWidget {
@@ -57,11 +74,17 @@ class ErrorApp extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.warning_rounded, size: 56, color: theme.colorScheme.primary),
+                  Icon(
+                    Icons.warning_rounded,
+                    size: 56,
+                    color: theme.colorScheme.primary,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'Startup error',
-                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(

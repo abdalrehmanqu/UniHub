@@ -9,6 +9,12 @@ final communityRepositoryProvider = Provider<CommunityRepository>((ref) {
   return CommunityRepository(ref.watch(supabaseClientProvider));
 });
 
+final selectedTagsProvider = StateProvider<Set<String>>((ref) => {});
+
+final communityCreateTagsProvider = StateProvider.autoDispose<Set<String>>(
+  (ref) => {},
+);
+
 class RealtimeCommunityNotifier
     extends AutoDisposeAsyncNotifier<List<CommunityPost>> {
   RealtimeChannel? _channel;
@@ -16,6 +22,7 @@ class RealtimeCommunityNotifier
   @override
   Future<List<CommunityPost>> build() async {
     final repo = ref.read(communityRepositoryProvider);
+    final userId = ref.read(supabaseClientProvider).auth.currentUser?.id;
     _channel?.unsubscribe();
     _channel = repo.subscribeToCommunityPosts(() {
       ref.invalidateSelf();
@@ -23,12 +30,29 @@ class RealtimeCommunityNotifier
     ref.onDispose(() {
       _channel?.unsubscribe();
     });
-    return repo.fetchCommunityPosts();
+    return repo.fetchCommunityPosts(currentUserId: userId);
   }
 }
 
-final communityFeedProvider = AutoDisposeAsyncNotifierProvider<
-    RealtimeCommunityNotifier,
-    List<CommunityPost>>(
-  RealtimeCommunityNotifier.new,
-);
+final communityFeedProvider =
+    AutoDisposeAsyncNotifierProvider<
+      RealtimeCommunityNotifier,
+      List<CommunityPost>
+    >(RealtimeCommunityNotifier.new);
+
+class SavedCommunityFeedNotifier
+    extends AutoDisposeAsyncNotifier<List<CommunityPost>> {
+  @override
+  Future<List<CommunityPost>> build() async {
+    final userId = ref.read(supabaseClientProvider).auth.currentUser?.id;
+    if (userId == null) return [];
+    final repo = ref.read(communityRepositoryProvider);
+    return repo.fetchSavedCommunityPosts(userId: userId);
+  }
+}
+
+final savedCommunityFeedProvider =
+    AutoDisposeAsyncNotifierProvider<
+      SavedCommunityFeedNotifier,
+      List<CommunityPost>
+    >(SavedCommunityFeedNotifier.new);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/avatar_image.dart';
@@ -84,7 +85,9 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 Text(
                   'About',
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -96,7 +99,9 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 Text(
                   'Quick actions',
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 _ActionTile(
@@ -109,7 +114,7 @@ class ProfileScreen extends ConsumerWidget {
                   title: 'Saved posts',
                   subtitle: 'Your bookmarked campus updates',
                   icon: Icons.bookmark_rounded,
-                  onTap: () {},
+                  onTap: () => context.push('/profile/saved'),
                 ),
                 _ActionTile(
                   title: 'Sign out',
@@ -164,7 +169,10 @@ class _ActionTile extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        trailing: Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -185,11 +193,17 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.person_outline, size: 56, color: theme.colorScheme.primary),
+            Icon(
+              Icons.person_outline,
+              size: 56,
+              color: theme.colorScheme.primary,
+            ),
             const SizedBox(height: 16),
             Text(
               title,
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),

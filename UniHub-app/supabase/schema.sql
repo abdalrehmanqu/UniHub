@@ -54,6 +54,22 @@ create table if not exists campus_posts (
   created_at timestamptz not null default now()
 );
 
+create table if not exists campus_post_saves (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references profiles(id) on delete cascade,
+  post_id uuid not null references campus_posts(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (user_id, post_id)
+);
+
+create table if not exists community_post_saves (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references profiles(id) on delete cascade,
+  post_id uuid not null references community_posts(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (user_id, post_id)
+);
+
 create table if not exists community_posts (
   id uuid primary key default gen_random_uuid(),
   author_id uuid not null references profiles(id) on delete cascade,
@@ -79,11 +95,17 @@ create table if not exists marketplace_listings (
 );
 
 create index if not exists campus_posts_created_idx on campus_posts (created_at desc);
+create index if not exists campus_post_saves_user_idx on campus_post_saves (user_id);
+create index if not exists campus_post_saves_post_idx on campus_post_saves (post_id);
+create index if not exists community_post_saves_user_idx on community_post_saves (user_id);
+create index if not exists community_post_saves_post_idx on community_post_saves (post_id);
 create index if not exists community_posts_created_idx on community_posts (created_at desc);
 create index if not exists marketplace_created_idx on marketplace_listings (created_at desc);
 
 alter table profiles enable row level security;
 alter table campus_posts enable row level security;
+alter table campus_post_saves enable row level security;
+alter table community_post_saves enable row level security;
 alter table community_posts enable row level security;
 alter table marketplace_listings enable row level security;
 
@@ -111,6 +133,30 @@ create policy "Campus posts update by owner" on campus_posts
   for update
   using (auth.uid() = author_id);
 
+create policy "Campus post saves readable" on campus_post_saves
+  for select
+  using (auth.uid() = user_id);
+
+create policy "Campus post saves insert by owner" on campus_post_saves
+  for insert
+  with check (auth.uid() = user_id);
+
+create policy "Campus post saves delete by owner" on campus_post_saves
+  for delete
+  using (auth.uid() = user_id);
+
+create policy "Community post saves readable" on community_post_saves
+  for select
+  using (auth.uid() = user_id);
+
+create policy "Community post saves insert by owner" on community_post_saves
+  for insert
+  with check (auth.uid() = user_id);
+
+create policy "Community post saves delete by owner" on community_post_saves
+  for delete
+  using (auth.uid() = user_id);
+
 create policy "Community posts readable" on community_posts
   for select
   using (auth.role() = 'authenticated');
@@ -121,6 +167,10 @@ create policy "Community posts insert by owner" on community_posts
 
 create policy "Community posts update by owner" on community_posts
   for update
+  using (auth.uid() = author_id);
+
+create policy "Community posts delete by owner" on community_posts
+  for delete
   using (auth.uid() = author_id);
 
 create policy "Marketplace listings readable" on marketplace_listings

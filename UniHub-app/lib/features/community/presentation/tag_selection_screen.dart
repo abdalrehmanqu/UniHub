@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'community_screen.dart';
+import '../providers/community_providers.dart';
 
 class TagSelectionScreen extends ConsumerStatefulWidget {
   const TagSelectionScreen({
     super.key,
     required this.allTags,
+    required this.tagsProvider,
   });
 
   final List<String> allTags;
+  final StateProvider<Set<String>> tagsProvider;
 
   @override
   ConsumerState<TagSelectionScreen> createState() => _TagSelectionScreenState();
@@ -39,7 +41,7 @@ class _TagSelectionScreenState extends ConsumerState<TagSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final selectedTags = ref.watch(selectedTagsProvider);
+    final selectedTags = ref.watch(widget.tagsProvider);
     final filteredTags = _getFilteredTags();
 
     return Scaffold(
@@ -90,7 +92,7 @@ class _TagSelectionScreenState extends ConsumerState<TagSelectionScreen> {
                     ),
                     TextButton(
                       onPressed: () {
-                        ref.read(selectedTagsProvider.notifier).state = {};
+                        ref.read(widget.tagsProvider.notifier).state = {};
                       },
                       child: const Text('Clear all'),
                     ),
@@ -145,7 +147,7 @@ class _TagSelectionScreenState extends ConsumerState<TagSelectionScreen> {
                                 } else {
                                   newTags.add(tag);
                                 }
-                                ref.read(selectedTagsProvider.notifier).state =
+                                ref.read(widget.tagsProvider.notifier).state =
                                     newTags;
                               },
                             ),
@@ -201,9 +203,7 @@ class _TagChip extends StatelessWidget {
         backgroundColor: theme.colorScheme.primaryContainer,
         selectedColor: theme.colorScheme.primaryContainer,
         side: BorderSide(color: theme.colorScheme.primary),
-        labelStyle: TextStyle(
-          color: theme.colorScheme.onPrimaryContainer,
-        ),
+        labelStyle: TextStyle(color: theme.colorScheme.onPrimaryContainer),
         checkmarkColor: theme.colorScheme.onPrimaryContainer,
         showCheckmark: false,
       );

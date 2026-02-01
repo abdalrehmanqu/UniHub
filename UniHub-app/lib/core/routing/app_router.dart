@@ -5,8 +5,11 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/providers/auth_providers.dart';
 import '../../features/community/presentation/community_screen.dart';
 import '../../features/community/presentation/community_search_screen.dart';
+import '../../features/community/presentation/create_community_post_screen.dart';
 import '../../features/feed/presentation/campus_feed_screen.dart';
+import '../../features/feed/presentation/create_campus_post_screen.dart';
 import '../../features/feed/presentation/feed_search_screen.dart';
+import '../../features/feed/presentation/saved_campus_posts_screen.dart';
 import '../../features/marketplace/presentation/marketplace_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../widgets/app_shell.dart';
@@ -36,8 +39,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const FeedSearchScreen(),
       ),
       GoRoute(
+        path: '/campus/create',
+        builder: (context, state) => const CreateCampusPostScreen(),
+      ),
+      GoRoute(
+        path: '/profile/saved',
+        builder: (context, state) => const SavedCampusPostsScreen(),
+      ),
+      GoRoute(
         path: '/community/search',
         builder: (context, state) => const CommunitySearchScreen(),
+      ),
+      GoRoute(
+        path: '/community/create',
+        builder: (context, state) => const CreateCommunityPostScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) =>
