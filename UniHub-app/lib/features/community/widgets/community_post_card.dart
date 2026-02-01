@@ -82,6 +82,9 @@ class CommunityPostCard extends StatelessWidget {
                   for (final tag in post.tags)
                     Chip(
                       label: Text('#$tag'),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                 ],
               ),

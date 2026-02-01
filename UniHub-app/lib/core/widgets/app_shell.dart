@@ -6,11 +6,7 @@ import '../../features/marketplace/providers/marketplace_providers.dart';
 import '../../features/profile/providers/profile_providers.dart';
 
 class AppShell extends ConsumerWidget {
-  const AppShell({
-    super.key,
-    required this.child,
-    required this.location,
-  });
+  const AppShell({super.key, required this.child, required this.location});
 
   final Widget child;
   final String location;
@@ -66,6 +62,8 @@ class AppShell extends ConsumerWidget {
     final isCommunity = location.startsWith('/community');
     final isMarketplace = location.startsWith('/marketplace');
     final showAdd = (isAdmin && isCampus) || (isStudent && isCommunity);
+    final showCommunityActions = isCommunity && !location.contains('/search');
+    final showFeedActions = isCampus && !location.contains('/search');
     final viewMode = isMarketplace
         ? ref.watch(marketplaceViewModeProvider)
         : MarketplaceViewMode.grid;
@@ -78,8 +76,7 @@ class AppShell extends ConsumerWidget {
     const toggleHeight = 34.0;
     const togglePadding = 3.0;
     const toggleIconSize = 18.0;
-    final toggleSegmentWidth =
-        (toggleWidth - (togglePadding * 2)) / 2;
+    final toggleSegmentWidth = (toggleWidth - (togglePadding * 2)) / 2;
     const toggleAnimation = Duration(milliseconds: 180);
 
     return Scaffold(
@@ -113,17 +110,47 @@ class AppShell extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (isMarketplace || showAdd)
+                    if (isMarketplace ||
+                        showAdd ||
+                        showCommunityActions ||
+                        showFeedActions)
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          if (showFeedActions)
+                            IconButton(
+                              icon: const Icon(Icons.search, size: 22),
+                              onPressed: () => context.push('/campus/search'),
+                              tooltip: 'Search',
+                              color: theme.colorScheme.onBackground,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 40,
+                              ),
+                            ),
+                          if (showCommunityActions)
+                            IconButton(
+                              icon: const Icon(Icons.search, size: 22),
+                              onPressed: () =>
+                                  context.push('/community/search'),
+                              tooltip: 'Search',
+                              color: theme.colorScheme.onBackground,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 40,
+                              ),
+                            ),
                           if (isMarketplace)
                             Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: GestureDetector(
                                 onTap: () {
                                   ref
-                                      .read(marketplaceViewModeProvider.notifier)
+                                      .read(
+                                        marketplaceViewModeProvider.notifier,
+                                      )
                                       .state = isGrid
                                       ? MarketplaceViewMode.list
                                       : MarketplaceViewMode.grid;
@@ -147,10 +174,14 @@ class AppShell extends ConsumerWidget {
                                             : Alignment.centerRight,
                                         child: Container(
                                           width: toggleSegmentWidth,
-                                          height: toggleHeight - (togglePadding * 2),
+                                          height:
+                                              toggleHeight -
+                                              (togglePadding * 2),
                                           decoration: BoxDecoration(
                                             color: toggleActiveColor,
-                                            borderRadius: BorderRadius.circular(999),
+                                            borderRadius: BorderRadius.circular(
+                                              999,
+                                            ),
                                           ),
                                         ),
                                       ),

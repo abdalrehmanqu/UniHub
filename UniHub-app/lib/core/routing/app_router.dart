@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/providers/auth_providers.dart';
 import '../../features/community/presentation/community_screen.dart';
+import '../../features/community/presentation/community_search_screen.dart';
 import '../../features/feed/presentation/campus_feed_screen.dart';
+import '../../features/feed/presentation/feed_search_screen.dart';
 import '../../features/marketplace/presentation/marketplace_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../widgets/app_shell.dart';
@@ -28,15 +30,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
+        path: '/campus/search',
+        builder: (context, state) => const FeedSearchScreen(),
+      ),
+      GoRoute(
+        path: '/community/search',
+        builder: (context, state) => const CommunitySearchScreen(),
       ),
       ShellRoute(
-        builder: (context, state, child) => AppShell(
-          location: state.uri.path,
-          child: child,
-        ),
+        builder: (context, state, child) =>
+            AppShell(location: state.uri.path, child: child),
         routes: [
           GoRoute(
             path: '/campus',
