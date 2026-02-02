@@ -37,11 +37,11 @@ Future<void> showCommunityCommentsSheet({
       return DraggableScrollableSheet(
         controller: sheetController,
         expand: false,
-        initialChildSize: 0.6,
-        minChildSize: 0.6,
+        initialChildSize: 0.7,
+        minChildSize: 0.7,
         maxChildSize: 0.95,
         snap: true,
-        snapSizes: const [0.6, 0.95],
+        snapSizes: const [0.7, 0.95],
         builder: (context, scrollController) {
           return ClipRRect(
             borderRadius: const BorderRadius.vertical(
@@ -91,21 +91,30 @@ class _CommunityCommentsSheet extends ConsumerStatefulWidget {
 class _CommunityCommentsSheetState
     extends ConsumerState<_CommunityCommentsSheet> {
   final _controller = TextEditingController();
+  final _inputFocus = FocusNode();
   CommunityComment? _replyingTo;
   bool _submitting = false;
 
   @override
   void dispose() {
+    _inputFocus.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (_submitting) return;
-    final text = _controller.text.trim();
+    var text = _controller.text.trim();
     if (text.isEmpty) return;
     final userId = ref.read(supabaseClientProvider).auth.currentUser?.id;
     if (userId == null) return;
+
+    if (_replyingTo != null) {
+      final mention = '@${_replyingTo!.authorName}';
+      while (text.startsWith(mention)) {
+        text = text.substring(mention.length).trimLeft();
+      }
+    }
 
     setState(() => _submitting = true);
     try {
@@ -113,7 +122,7 @@ class _CommunityCommentsSheetState
             postId: widget.post.id,
             authorId: userId,
             content: text,
-            parentId: _replyingTo?.id,
+            parentId: _replyingTo?.parentId ?? _replyingTo?.id,
           );
       _controller.clear();
       setState(() {
@@ -223,10 +232,19 @@ class _CommunityCommentsSheetState
                           _CommentItem(
                             comment: item.comment,
                             replies: item.replies,
-                            onReply: () {
+                            onReply: (target) {
+                              final mention = '@${target.authorName} ';
                               setState(() {
-                                _replyingTo = item.comment;
+                                _replyingTo = target;
                               });
+                              if (!_controller.text.startsWith(mention)) {
+                                _controller.text = mention;
+                                _controller.selection =
+                                    TextSelection.fromPosition(
+                                  TextPosition(offset: _controller.text.length),
+                                );
+                              }
+                              _inputFocus.requestFocus();
                             },
                           ),
                       ],
@@ -339,6 +357,7 @@ class _CommunityCommentsSheetState
                                   final hasText = value.text.trim().isNotEmpty;
                                   return TextField(
                                     controller: _controller,
+                                    focusNode: _inputFocus,
                                     minLines: 1,
                                     maxLines: 2,
                                     textInputAction: TextInputAction.newline,
@@ -370,7 +389,7 @@ class _CommunityCommentsSheetState
                                                       theme.colorScheme.primary,
                                                   borderRadius:
                                                       const BorderRadius.all(
-                                                    Radius.circular(18),
+                                                    Radius.circular(12),
                                                   ),
                                                 ),
                                                 child: const Icon(
@@ -387,8 +406,8 @@ class _CommunityCommentsSheetState
                                         height: 36,
                                       ),
                                       border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(80),
+                                      borderRadius:
+                                          BorderRadius.circular(18),
                                         borderSide: BorderSide.none,
                                       ),
                                     ),
@@ -417,7 +436,7 @@ String _shortName(String name, {int max = 16}) {
   return '${first.substring(0, max - 1)}…';
 }
 
-class _CommentItem extends StatelessWidget {
+class _CommentItem extends StatefulWidget {
   const _CommentItem({
     required this.comment,
     required this.replies,
@@ -426,7 +445,14 @@ class _CommentItem extends StatelessWidget {
 
   final CommunityComment comment;
   final List<CommunityComment> replies;
-  final VoidCallback onReply;
+  final ValueChanged<CommunityComment> onReply;
+
+  @override
+  State<_CommentItem> createState() => _CommentItemState();
+}
+
+class _CommentItemState extends State<_CommentItem> {
+  bool _showReplies = false;
 
   @override
   Widget build(BuildContext context) {
@@ -436,21 +462,94 @@ class _CommentItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _CommentRow(
-            comment: comment,
-            onReply: onReply,
+            comment: widget.comment,
+            onReply: () => widget.onReply(widget.comment),
           ),
-          if (replies.isNotEmpty)
+          if (!_showReplies && widget.replies.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(left: 44, top: 8),
+              padding: const EdgeInsets.only(left: 44, top: 2),
+              child: TextButton(
+                onPressed: () =>
+                    setState(() => _showReplies = !_showReplies),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 1,
+                      margin: const EdgeInsets.only(right: 8),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurfaceVariant
+                          .withOpacity(0.5),
+                    ),
+                    Text(
+                      'View ${widget.replies.length} more replies',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (_showReplies && widget.replies.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 44, top: 6),
               child: Column(
                 children: [
-                  for (final reply in replies)
+                  for (final reply in widget.replies)
                     _CommentRow(
                       comment: reply,
-                      onReply: () {},
+                      onReply: () => widget.onReply(reply),
                       isReply: true,
+                      replyToName: widget.comment.authorName,
                     ),
                 ],
+              ),
+            ),
+          if (_showReplies && widget.replies.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 44, top: 4),
+              child: TextButton(
+                onPressed: () =>
+                    setState(() => _showReplies = !_showReplies),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 1,
+                      margin: const EdgeInsets.only(right: 8),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurfaceVariant
+                          .withOpacity(0.5),
+                    ),
+                    Text(
+                      'Hide replies',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],
@@ -464,15 +563,18 @@ class _CommentRow extends StatelessWidget {
     required this.comment,
     required this.onReply,
     this.isReply = false,
+    this.replyToName,
   });
 
   final CommunityComment comment;
   final VoidCallback onReply;
   final bool isReply;
+  final String? replyToName;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isAdmin = comment.authorRole?.toLowerCase() == 'admin';
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -498,6 +600,14 @@ class _CommentRow extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  if (isAdmin) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.verified_rounded,
+                      size: 14,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ],
                   const SizedBox(width: 8),
                   Text(
                     formatTimeAgo(comment.createdAt),
@@ -508,19 +618,43 @@ class _CommentRow extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 4),
-              Text(
-                comment.content,
-                style: theme.textTheme.bodyMedium,
-              ),
-              if (!isReply)
-                TextButton(
-                  onPressed: onReply,
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
+              if (isReply && replyToName != null)
+                RichText(
+                  text: TextSpan(
+                    style: theme.textTheme.bodyMedium,
+                    children: [
+                      TextSpan(
+                        text: '@${replyToName!} ',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.secondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      TextSpan(text: comment.content),
+                    ],
                   ),
-                  child: const Text('Reply'),
+                )
+              else
+                Text(
+                  comment.content,
+                  style: theme.textTheme.bodyMedium,
                 ),
+              TextButton(
+                onPressed: onReply,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Reply',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

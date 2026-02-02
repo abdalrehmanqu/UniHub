@@ -7,6 +7,7 @@ class CommunityComment {
     required this.content,
     required this.createdAt,
     this.authorAvatarUrl,
+    this.authorRole,
     this.parentId,
   });
 
@@ -17,6 +18,7 @@ class CommunityComment {
   final String content;
   final DateTime createdAt;
   final String? authorAvatarUrl;
+  final String? authorRole;
   final String? parentId;
 
   factory CommunityComment.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class CommunityComment {
           ? displayName!
           : (username?.isNotEmpty == true ? username! : 'Student'),
       authorAvatarUrl: profile?['avatar_url']?.toString(),
+      authorRole: profile?['role']?.toString(),
       content: (json['content'] ?? '').toString(),
       createdAt: createdAt,
     );

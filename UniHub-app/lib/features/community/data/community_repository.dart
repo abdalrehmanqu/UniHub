@@ -115,7 +115,7 @@ class CommunityRepository {
   }) async {
     final data = await _client
         .from('community_comments')
-        .select('*, profiles (username, display_name, avatar_url)')
+        .select('*, profiles (username, display_name, avatar_url, role)')
         .eq('post_id', postId)
         .order('created_at', ascending: true);
 
