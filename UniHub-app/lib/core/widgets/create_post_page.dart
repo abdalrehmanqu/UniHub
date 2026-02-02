@@ -39,6 +39,7 @@ class CreatePostPage extends ConsumerStatefulWidget {
     this.successMessage = 'Post created successfully',
     this.extraFieldsBuilder,
     this.contentPadding,
+    this.scrollController,
   });
 
   final Future<void> Function(CreatePostPayload payload) onSubmit;
@@ -49,6 +50,7 @@ class CreatePostPage extends ConsumerStatefulWidget {
   final String successMessage;
   final List<Widget> Function(BuildContext, WidgetRef)? extraFieldsBuilder;
   final EdgeInsetsGeometry? contentPadding;
+  final ScrollController? scrollController;
 
   @override
   ConsumerState<CreatePostPage> createState() => _CreatePostPageState();
@@ -60,7 +62,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
   final _urlController = TextEditingController();
   final _contentFocusNode = FocusNode();
   final _urlFocusNode = FocusNode();
-  final _contentScrollController = ScrollController();
+  late final ScrollController _contentScrollController;
   late final quill.QuillController _quillController;
   final _imagePicker = ImagePicker();
   bool _isSubmitting = false;
@@ -85,6 +87,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
     _contentFocusNode.addListener(_onFormChanged);
     _quillController = quill.QuillController.basic();
     _quillController.addListener(_onFormChanged);
+    _contentScrollController = widget.scrollController ?? ScrollController();
   }
 
   @override
@@ -96,7 +99,9 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
     _urlController.dispose();
     _contentFocusNode.dispose();
     _urlFocusNode.dispose();
-    _contentScrollController.dispose();
+    if (widget.scrollController == null) {
+      _contentScrollController.dispose();
+    }
     _quillController.dispose();
     super.dispose();
   }
@@ -593,9 +598,14 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
             children: [
               Expanded(
                 child: ListView(
-                  padding:
-                      widget.contentPadding ??
-                      const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                  padding: (widget.contentPadding ??
+                          const EdgeInsets.fromLTRB(20, 16, 20, 20))
+                      .add(
+                    EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                  ),
+                  controller: _contentScrollController,
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   children: [

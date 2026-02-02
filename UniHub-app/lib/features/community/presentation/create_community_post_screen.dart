@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../auth/providers/auth_providers.dart';
 import 'package:unihub/core/widgets/create_post_page.dart';
@@ -16,12 +17,27 @@ class CreateCommunityPostScreen extends ConsumerStatefulWidget {
 class _CreateCommunityPostScreenState
     extends ConsumerState<CreateCommunityPostScreen> {
   final _tagSearchController = TextEditingController();
+  final _tagSearchFocusNode = FocusNode();
+  final _tagsSectionKey = GlobalKey();
+  final _contentScrollController = ScrollController();
   final Set<String> _customTags = {};
   bool _isTagSearchExpanded = false;
 
   @override
+  void initState() {
+    super.initState();
+    _tagSearchFocusNode.addListener(() {
+      if (_tagSearchFocusNode.hasFocus) {
+        _ensureTagsVisible();
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _tagSearchController.dispose();
+    _tagSearchFocusNode.dispose();
+    _contentScrollController.dispose();
     super.dispose();
   }
 
@@ -34,6 +50,31 @@ class _CreateCommunityPostScreenState
     return withoutHash.replaceAll(RegExp(r'\\s+'), '-');
   }
 
+  void _ensureTagsVisible() {
+    final context = _tagsSectionKey.currentContext;
+    if (context == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final renderObject = context.findRenderObject();
+      if (renderObject is RenderBox) {
+        final viewport = RenderAbstractViewport.of(renderObject);
+        final offset = viewport.getOffsetToReveal(renderObject, 0.1).offset;
+        if (_contentScrollController.hasClients) {
+          _contentScrollController.animateTo(
+            offset,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+          );
+          return;
+        }
+      }
+      Scrollable.ensureVisible(
+        context,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+        alignment: 0.1,
+      );
+    });
+  }
 
 
   @override
@@ -50,7 +91,7 @@ class _CreateCommunityPostScreenState
       },
       orElse: () => <String>[],
     );
-        final availableTags = {...allTags, ..._customTags}.toList()..sort();
+    final availableTags = {...allTags, ..._customTags}.toList()..sort();
 
     return CreatePostPage(
       appBarTitle: 'Create Post',
@@ -59,6 +100,7 @@ class _CreateCommunityPostScreenState
       mediaBucket: 'post-media',
       successMessage: 'Community post created',
       contentPadding: const EdgeInsets.fromLTRB(12, 16, 12, 20),
+      scrollController: _contentScrollController,
       extraFieldsBuilder: (context, ref) {
         final theme = Theme.of(context);
         final selectedTags = ref.watch(communityCreateTagsProvider);
@@ -81,6 +123,7 @@ class _CreateCommunityPostScreenState
             !availableTags.map((t) => t.toLowerCase()).contains(tagQuery);
         return [
           Row(
+            key: _tagsSectionKey,
             children: [
               Text(
                 'Tags (optional)',
@@ -88,7 +131,7 @@ class _CreateCommunityPostScreenState
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               AnimatedSize(
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOut,
@@ -100,12 +143,13 @@ class _CreateCommunityPostScreenState
                   child: _isTagSearchExpanded
                       ? SizedBox(
                           key: const ValueKey('tag-search'),
-                          width: 140,
-                          height: 32,
+                          width: 200,
+                          height: 35,
                           child: TextField(
                             controller: _tagSearchController,
+                            focusNode: _tagSearchFocusNode,
                             decoration: InputDecoration(
-                              hintText: 'Search tag',
+                              hintText: 'Search/add tag',
                               prefixIcon: const Icon(Icons.search, size: 16),
                               suffixIcon: _tagSearchController.text.isNotEmpty
                                   ? IconButton(
@@ -145,84 +189,105 @@ class _CreateCommunityPostScreenState
                     _isTagSearchExpanded = !_isTagSearchExpanded;
                     if (!_isTagSearchExpanded) {
                       _tagSearchController.clear();
+                      _tagSearchFocusNode.unfocus();
+                    } else {
+                      _tagSearchFocusNode.requestFocus();
                     }
                   });
+                  if (_isTagSearchExpanded) {
+                    _ensureTagsVisible();
+                  }
                 },
               ),
             ],
           ),
           const SizedBox(height: 8),
-          if (filteredTags.isNotEmpty)
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final tag in filteredTags)
-                  _TagChip(
-                    tag: tag,
-                    isSelected: selectedTags.contains(tag),
-                    onTap: () {
-                      final newTags = Set<String>.from(selectedTags);
-                      if (selectedTags.contains(tag)) {
-                        newTags.remove(tag);
-                        if (_customTags.contains(tag) &&
-                            !allTags.contains(tag)) {
-                          setState(() {
-                            _customTags.remove(tag);
-                          });
-                        }
-                      } else {
-                        newTags.add(tag);
-                      }
-                      ref.read(communityCreateTagsProvider.notifier).state =
-                          newTags;
-                    },
-                  ),
-                ActionChip(
-                  label: const Icon(Icons.add, size: 18),
-                  onPressed: canAddTag
-                      ? () {
-                          final newTag = _normalizeTag(
-                            _tagSearchController.text,
-                          );
-                          if (newTag.isEmpty) return;
-                          setState(() {
-                            _customTags.add(newTag);
-                            _tagSearchController.clear();
-                          });
-                          final newTags = Set<String>.from(selectedTags)
-                            ..add(newTag);
-                          ref.read(communityCreateTagsProvider.notifier).state =
-                              newTags;
-                        }
-                      : null,
-                  side: BorderSide(color: theme.colorScheme.outline),
-                  backgroundColor: theme.colorScheme.surface,
-                ),
-              ],
-            )
-          else
-            ActionChip(
-              label: const Icon(Icons.add, size: 18),
-              onPressed: canAddTag
-                  ? () {
-                      final newTag = _normalizeTag(
-                        _tagSearchController.text,
-                      );
-                      if (newTag.isEmpty) return;
-                      setState(() {
-                        _customTags.add(newTag);
-                        _tagSearchController.clear();
-                      });
-                      final newTags = Set<String>.from(selectedTags)
-                        ..add(newTag);
-                      ref.read(communityCreateTagsProvider.notifier).state =
-                          newTags;
-                    }
-                  : null,
-              side: BorderSide(color: theme.colorScheme.outline),
-              backgroundColor: theme.colorScheme.surface,
+          AnimatedPadding(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            padding: EdgeInsets.only(
+              bottom:
+                  _isTagSearchExpanded ? MediaQuery.of(context).viewInsets.bottom : 0,
             ),
+            child: filteredTags.isNotEmpty
+                ? Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final tag in filteredTags)
+                        _TagChip(
+                          tag: tag,
+                          isSelected: selectedTags.contains(tag),
+                          onTap: () {
+                            final newTags = Set<String>.from(selectedTags);
+                            if (selectedTags.contains(tag)) {
+                              newTags.remove(tag);
+                              if (_customTags.contains(tag) &&
+                                  !allTags.contains(tag)) {
+                                setState(() {
+                                  _customTags.remove(tag);
+                                });
+                              }
+                            } else {
+                              newTags.add(tag);
+                            }
+                            ref.read(communityCreateTagsProvider.notifier).state =
+                                newTags;
+                          },
+                        ),
+                      ActionChip(
+                        label: const Icon(Icons.add, size: 18),
+                        onPressed: canAddTag
+                            ? () {
+                                final newTag = _normalizeTag(
+                                  _tagSearchController.text,
+                                );
+                                if (newTag.isEmpty) return;
+                                setState(() {
+                                  _customTags.add(newTag);
+                                  _tagSearchController.clear();
+                                });
+                                final newTags = Set<String>.from(selectedTags)
+                                  ..add(newTag);
+                                ref
+                                        .read(
+                                          communityCreateTagsProvider.notifier,
+                                        )
+                                        .state =
+                                    newTags;
+                              }
+                            : null,
+                        side: BorderSide(color: theme.colorScheme.outline),
+                        backgroundColor: theme.colorScheme.surface,
+                      ),
+                    ],
+                  )
+                : ActionChip(
+                    label: const Icon(Icons.add, size: 18),
+                    onPressed: canAddTag
+                        ? () {
+                            final newTag = _normalizeTag(
+                              _tagSearchController.text,
+                            );
+                            if (newTag.isEmpty) return;
+                            setState(() {
+                              _customTags.add(newTag);
+                              _tagSearchController.clear();
+                            });
+                            final newTags = Set<String>.from(selectedTags)
+                              ..add(newTag);
+                            ref
+                                    .read(
+                                      communityCreateTagsProvider.notifier,
+                                    )
+                                    .state =
+                                newTags;
+                          }
+                        : null,
+                    side: BorderSide(color: theme.colorScheme.outline),
+                    backgroundColor: theme.colorScheme.surface,
+                  ),
+          ),
           const SizedBox(height: 4),
         ];
       },
