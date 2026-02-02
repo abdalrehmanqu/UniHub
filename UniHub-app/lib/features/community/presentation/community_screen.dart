@@ -134,13 +134,20 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                       subtitle: 'Try selecting different tags',
                     )
                   : ListView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
+                      padding: EdgeInsets.zero,
                       children: [
                         for (final post in filteredPosts)
-                          CommunityPostCard(post: post),
+                          Column(
+                            children: [
+                              CommunityPostCard(post: post),
+                              Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: theme.colorScheme.outlineVariant
+                                    .withOpacity(0.4),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
             ),

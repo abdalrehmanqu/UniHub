@@ -13,6 +13,8 @@ class CommunityPostCard extends ConsumerWidget {
 
   final CommunityPost post;
 
+  static const _deleteAction = 'delete';
+
   Future<void> _toggleSave(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
     final userId = ref.read(supabaseClientProvider).auth.currentUser?.id;
@@ -82,18 +84,11 @@ class CommunityPostCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final borderColor = theme.colorScheme.outlineVariant.withOpacity(0.55);
     final userId = ref.read(supabaseClientProvider).auth.currentUser?.id;
     final canDelete = userId != null && userId == post.authorId;
-    return Card(
+    return Container(
+      margin: EdgeInsets.zero,
       color: theme.colorScheme.background,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: borderColor),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -131,11 +126,31 @@ class CommunityPostCard extends ConsumerWidget {
                   ),
                 ),
                 if (canDelete)
-                  IconButton(
-                    onPressed: () => _confirmDelete(context, ref),
-                    icon: const Icon(Icons.delete_outline_rounded),
-                    color: theme.colorScheme.error,
-                    tooltip: 'Delete post',
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_horiz_rounded),
+                    tooltip: 'More',
+                    onSelected: (value) {
+                      if (value == _deleteAction) {
+                        _confirmDelete(context, ref);
+                      }
+                    },
+                    itemBuilder: (context) {
+                      return [
+                        PopupMenuItem<String>(
+                          value: _deleteAction,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete_outline_rounded,
+                                color: theme.colorScheme.error,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('Delete'),
+                            ],
+                          ),
+                        ),
+                      ];
+                    },
                   ),
               ],
             ),
@@ -156,14 +171,61 @@ class CommunityPostCard extends ConsumerWidget {
             if (post.tags.isNotEmpty) ...[
               const SizedBox(height: 12),
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: 10,
+                runSpacing: 6,
                 children: [
-                  for (final tag in post.tags)
-                    Chip(
-                      label: Text('#$tag'),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  for (final tag in post.tags.take(3))
+                    Text(
+                      '#$tag',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                      ),
+                    ),
+                  if (post.tags.length > 3)
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet<void>(
+                          context: context,
+                          backgroundColor: theme.colorScheme.background,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                          ),
+                          builder: (context) {
+                            return SafeArea(
+                              top: false,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                                child: Wrap(
+                                  spacing: 10,
+                                  runSpacing: 8,
+                                  children: [
+                                    for (final tag in post.tags)
+                                      Text(
+                                        '#$tag',
+                                        style: theme.textTheme.labelSmall?.copyWith(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      child: Text(
+                        'more',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
+                        ),
                       ),
                     ),
                 ],
@@ -179,37 +241,25 @@ class CommunityPostCard extends ConsumerWidget {
                       post: post,
                     );
                   },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceVariant.withOpacity(0.35),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: theme.colorScheme.outlineVariant.withOpacity(0.7),
-                    ),
-                  ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.chat_bubble_outline_rounded,
-                          size: 14,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        size: 24,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${post.commentCount}',
+                        style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
+                          fontSize: 13,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${post.commentCount}',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.2,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 const Spacer(),

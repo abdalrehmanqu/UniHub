@@ -330,20 +330,13 @@ class PostCard extends ConsumerWidget {
         (post.mediaUrl?.toLowerCase().contains('.mov') ?? false) ||
         (post.mediaUrl?.toLowerCase().contains('.m4v') ?? false) ||
         (post.mediaUrl?.toLowerCase().contains('.webm') ?? false);
-    final borderColor = theme.colorScheme.outlineVariant.withOpacity(0.55);
     final parsedContent = _parseContent(post.content);
     final linkUrl = parsedContent.url;
     final bodyText = parsedContent.body;
 
-    return Card(
+    return Container(
       color: theme.colorScheme.background,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: borderColor),
-      ),
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

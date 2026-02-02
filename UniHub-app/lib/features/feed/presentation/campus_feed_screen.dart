@@ -23,9 +23,22 @@ class CampusFeedScreen extends ConsumerWidget {
               );
             }
             return ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: EdgeInsets.zero,
               children: [
-                for (final post in posts) PostCard(post: post),
+                for (final post in posts)
+                  Column(
+                    children: [
+                      PostCard(post: post),
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outlineVariant
+                            .withOpacity(0.4),
+                      ),
+                    ],
+                  ),
               ],
             );
           },
