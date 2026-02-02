@@ -103,6 +103,7 @@ class CommunityRepository {
         .delete()
         .eq('id', postId)
         .select('id');
+    // ignore: unnecessary_type_check
     if (data is List && data.isEmpty) {
       throw StateError('Delete failed. Check row policies for community_posts.');
     }

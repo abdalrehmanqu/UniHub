@@ -55,6 +55,7 @@ class FeedRepository {
         .delete()
         .eq('id', postId)
         .select();
+    // ignore: unnecessary_type_check
     if (result is List && result.isEmpty) {
       throw StateError('Delete failed. Check row policies for campus_posts.');
     }

@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/avatar_image.dart';
-import '../../../core/widgets/unihub_logo.dart';
 import '../../auth/providers/auth_providers.dart';
 import '../providers/profile_providers.dart';
 
