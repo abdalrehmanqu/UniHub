@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../domain/community_comment.dart';
 import '../domain/community_post.dart';
 
 class CommunityRepository {
@@ -107,6 +108,34 @@ class CommunityRepository {
     if (data is List && data.isEmpty) {
       throw StateError('Delete failed. Check row policies for community_posts.');
     }
+  }
+
+  Future<List<CommunityComment>> fetchCommunityComments({
+    required String postId,
+  }) async {
+    final data = await _client
+        .from('community_comments')
+        .select('*, profiles (username, display_name, avatar_url)')
+        .eq('post_id', postId)
+        .order('created_at', ascending: true);
+
+    return (data as List<dynamic>)
+        .map((item) => CommunityComment.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> addCommunityComment({
+    required String postId,
+    required String authorId,
+    required String content,
+    String? parentId,
+  }) async {
+    await _client.from('community_comments').insert({
+      'post_id': postId,
+      'author_id': authorId,
+      'content': content,
+      if (parentId != null) 'parent_id': parentId,
+    });
   }
 
   RealtimeChannel subscribeToCommunityPosts(void Function() onChange) {

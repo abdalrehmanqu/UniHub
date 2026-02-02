@@ -82,6 +82,15 @@ create table if not exists community_posts (
   created_at timestamptz not null default now()
 );
 
+create table if not exists community_comments (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references community_posts(id) on delete cascade,
+  author_id uuid not null references profiles(id) on delete cascade,
+  parent_id uuid references community_comments(id) on delete cascade,
+  content text not null,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists marketplace_listings (
   id uuid primary key default gen_random_uuid(),
   seller_id uuid not null references profiles(id) on delete cascade,
@@ -100,6 +109,9 @@ create index if not exists campus_post_saves_post_idx on campus_post_saves (post
 create index if not exists community_post_saves_user_idx on community_post_saves (user_id);
 create index if not exists community_post_saves_post_idx on community_post_saves (post_id);
 create index if not exists community_posts_created_idx on community_posts (created_at desc);
+create index if not exists community_comments_post_idx on community_comments (post_id);
+create index if not exists community_comments_parent_idx on community_comments (parent_id);
+create index if not exists community_comments_created_idx on community_comments (created_at asc);
 create index if not exists marketplace_created_idx on marketplace_listings (created_at desc);
 
 alter table profiles enable row level security;
@@ -107,6 +119,7 @@ alter table campus_posts enable row level security;
 alter table campus_post_saves enable row level security;
 alter table community_post_saves enable row level security;
 alter table community_posts enable row level security;
+alter table community_comments enable row level security;
 alter table marketplace_listings enable row level security;
 
 create policy "Profiles are viewable by authenticated" on profiles
@@ -172,6 +185,44 @@ create policy "Community posts update by owner" on community_posts
 create policy "Community posts delete by owner" on community_posts
   for delete
   using (auth.uid() = author_id);
+
+create policy "Community comments readable" on community_comments
+  for select
+  using (auth.role() = 'authenticated');
+
+create policy "Community comments insert by owner" on community_comments
+  for insert
+  with check (auth.uid() = author_id);
+
+create policy "Community comments delete by owner" on community_comments
+  for delete
+  using (auth.uid() = author_id);
+
+create or replace function public.handle_community_comment_count()
+returns trigger
+language plpgsql
+as $$
+begin
+  if (tg_op = 'INSERT') then
+    update community_posts
+      set comment_count = comment_count + 1
+      where id = new.post_id;
+    return new;
+  elsif (tg_op = 'DELETE') then
+    update community_posts
+      set comment_count = greatest(comment_count - 1, 0)
+      where id = old.post_id;
+    return old;
+  end if;
+  return null;
+end;
+$$;
+
+drop trigger if exists community_comment_count_trigger on community_comments;
+
+create trigger community_comment_count_trigger
+after insert or delete on community_comments
+for each row execute procedure public.handle_community_comment_count();
 
 create policy "Marketplace listings readable" on marketplace_listings
   for select

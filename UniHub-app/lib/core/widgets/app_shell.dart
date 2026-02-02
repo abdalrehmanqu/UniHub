@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/marketplace/providers/marketplace_providers.dart';
 import '../../features/profile/providers/profile_providers.dart';
+import '../providers/ui_providers.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child, required this.location});
@@ -67,6 +68,8 @@ class AppShell extends ConsumerWidget {
     final viewMode = isMarketplace
         ? ref.watch(marketplaceViewModeProvider)
         : MarketplaceViewMode.grid;
+    final bottomNavVisible = ref.watch(bottomNavVisibleProvider);
+    final commentsScrimOpacity = ref.watch(commentsScrimOpacityProvider);
     final isGrid = viewMode == MarketplaceViewMode.grid;
     final toggleActiveColor = theme.colorScheme.primary;
     final toggleInactiveColor = theme.colorScheme.surfaceVariant;
@@ -80,115 +83,105 @@ class AppShell extends ConsumerWidget {
     const toggleAnimation = Duration(milliseconds: 180);
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-              child: SizedBox(
-                height: 44,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 24,
-                      child: Image.network(
-                        'https://omrwuqfyiyixnpvvrywi.supabase.co/storage/v1/object/public/branding/unihub_icon_black_transparent.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 21,
-                          color: theme.colorScheme.onBackground,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                  child: SizedBox(
+                    height: 44,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 24,
+                          child: Image.network(
+                            'https://omrwuqfyiyixnpvvrywi.supabase.co/storage/v1/object/public/branding/unihub_icon_black_transparent.png',
+                            fit: BoxFit.contain,
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (isMarketplace ||
-                        showAdd ||
-                        showCommunityActions ||
-                        showFeedActions)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (showFeedActions)
-                            IconButton(
-                              icon: const Icon(Icons.search, size: 22),
-                              onPressed: () => context.push('/campus/search'),
-                              tooltip: 'Search',
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 21,
                               color: theme.colorScheme.onBackground,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 40,
-                                minHeight: 40,
-                              ),
                             ),
-                          if (showCommunityActions)
-                            IconButton(
-                              icon: const Icon(Icons.search, size: 22),
-                              onPressed: () =>
-                                  context.push('/community/search'),
-                              tooltip: 'Search',
-                              color: theme.colorScheme.onBackground,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 40,
-                                minHeight: 40,
-                              ),
-                            ),
-                          if (isMarketplace)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: GestureDetector(
-                                onTap: () {
-                                  ref
-                                      .read(
-                                        marketplaceViewModeProvider.notifier,
-                                      )
-                                      .state = isGrid
-                                      ? MarketplaceViewMode.list
-                                      : MarketplaceViewMode.grid;
-                                },
-                                child: AnimatedContainer(
-                                  duration: toggleAnimation,
-                                  width: toggleWidth,
-                                  height: toggleHeight,
-                                  padding: const EdgeInsets.all(togglePadding),
-                                  decoration: BoxDecoration(
-                                    color: toggleInactiveColor,
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      AnimatedAlign(
-                                        duration: toggleAnimation,
-                                        curve: Curves.easeOutCubic,
-                                        alignment: isGrid
-                                            ? Alignment.centerLeft
-                                            : Alignment.centerRight,
-                                        child: Container(
-                                          width: toggleSegmentWidth,
-                                          height:
-                                              toggleHeight -
-                                              (togglePadding * 2),
-                                          decoration: BoxDecoration(
-                                            color: toggleActiveColor,
-                                            borderRadius: BorderRadius.circular(
-                                              999,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (isMarketplace ||
+                            showAdd ||
+                            showCommunityActions ||
+                            showFeedActions)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (showFeedActions)
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon:
+                                          const Icon(Icons.search_rounded),
+                                      onPressed: () {
+                                        context.push('/campus/search');
+                                      },
+                                      tooltip: 'Search',
+                                    ),
+                                    const SizedBox(width: 6),
+                                  ],
+                                ),
+                              if (showCommunityActions)
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon:
+                                          const Icon(Icons.search_rounded),
+                                      onPressed: () {
+                                        context.push('/community/search');
+                                      },
+                                      tooltip: 'Search',
+                                    ),
+                                    const SizedBox(width: 6),
+                                  ],
+                                ),
+                              if (isMarketplace)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 6),
+                                  child: AnimatedContainer(
+                                    duration: toggleAnimation,
+                                    width: toggleWidth,
+                                    height: toggleHeight,
+                                    padding: const EdgeInsets.all(
+                                      togglePadding,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: toggleInactiveColor,
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        AnimatedAlign(
+                                          duration: toggleAnimation,
+                                          curve: Curves.easeInOut,
+                                          alignment: isGrid
+                                              ? Alignment.centerLeft
+                                              : Alignment.centerRight,
+                                          child: Container(
+                                            width: toggleSegmentWidth,
+                                            decoration: BoxDecoration(
+                                              color: toggleActiveColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(999),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      Align(
-                                        alignment: Alignment.center,
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
+                                        Row(
                                           children: [
                                             SizedBox(
                                               width: toggleSegmentWidth,
@@ -216,70 +209,81 @@ class AppShell extends ConsumerWidget {
                                             ),
                                           ],
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          if (showAdd)
-                            IconButton(
-                              icon: const Icon(Icons.add_rounded, size: 28),
-                              onPressed: () {
-                                if (isCampus) {
-                                  context.push('/campus/create');
-                                } else if (isCommunity) {
-                                  context.push('/community/create');
-                                }
-                              },
-                              tooltip: 'Create',
-                              color: theme.colorScheme.primary,
-                            ),
-                        ],
-                      ),
-                  ],
+                              if (showAdd)
+                                IconButton(
+                                  icon:
+                                      const Icon(Icons.add_rounded, size: 28),
+                                  onPressed: () {
+                                    if (isCampus) {
+                                      context.push('/campus/create');
+                                    } else if (isCommunity) {
+                                      context.push('/community/create');
+                                    }
+                                  },
+                                  tooltip: 'Create',
+                                  color: theme.colorScheme.primary,
+                                ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Expanded(child: child),
-          ],
-        ),
-      ),
-      bottomNavigationBar: ColoredBox(
-        color: theme.colorScheme.background,
-        child: SafeArea(
-          top: false,
-          bottom: true,
-          child: SizedBox(
-            height: 56,
-            child: NavigationBar(
-              height: 56,
-              selectedIndex: currentIndex,
-              onDestinationSelected: (index) =>
-                  _onDestinationSelected(context, index),
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.home_filled),
-                  label: 'Campus',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.forum_rounded),
-                  label: 'Community',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.storefront_rounded),
-                  label: 'Market',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.person),
-                  label: 'Profile',
-                ),
+                Expanded(child: child),
               ],
             ),
           ),
-        ),
+          if (commentsScrimOpacity > 0)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: ColoredBox(
+                  color: Colors.black.withOpacity(commentsScrimOpacity),
+                ),
+              ),
+            ),
+        ],
       ),
+      bottomNavigationBar: bottomNavVisible
+          ? ColoredBox(
+              color: theme.colorScheme.background,
+              child: SafeArea(
+                top: false,
+                bottom: true,
+                child: SizedBox(
+                  height: 56,
+                  child: NavigationBar(
+                    height: 56,
+                    selectedIndex: currentIndex,
+                    onDestinationSelected: (index) =>
+                        _onDestinationSelected(context, index),
+                    labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+                    destinations: const [
+                      NavigationDestination(
+                        icon: Icon(Icons.home_filled),
+                        label: 'Campus',
+                      ),
+                      NavigationDestination(
+                        icon: Icon(Icons.forum_rounded),
+                        label: 'Community',
+                      ),
+                      NavigationDestination(
+                        icon: Icon(Icons.storefront_rounded),
+                        label: 'Market',
+                      ),
+                      NavigationDestination(
+                        icon: Icon(Icons.person),
+                        label: 'Profile',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          : null,
     );
   }
 }

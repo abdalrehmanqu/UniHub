@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../auth/providers/auth_providers.dart';
 import '../data/community_repository.dart';
+import '../domain/community_comment.dart';
 import '../domain/community_post.dart';
 
 final communityRepositoryProvider = Provider<CommunityRepository>((ref) {
@@ -56,3 +57,12 @@ final savedCommunityFeedProvider =
       SavedCommunityFeedNotifier,
       List<CommunityPost>
     >(SavedCommunityFeedNotifier.new);
+
+final communityCommentsProvider =
+    FutureProvider.autoDispose.family<List<CommunityComment>, String>((
+      ref,
+      postId,
+    ) async {
+      final repo = ref.read(communityRepositoryProvider);
+      return repo.fetchCommunityComments(postId: postId);
+    });
