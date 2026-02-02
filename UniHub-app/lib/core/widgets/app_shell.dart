@@ -153,63 +153,75 @@ class AppShell extends ConsumerWidget {
                               if (isMarketplace)
                                 Padding(
                                   padding: const EdgeInsets.only(right: 6),
-                                  child: AnimatedContainer(
-                                    duration: toggleAnimation,
-                                    width: toggleWidth,
-                                    height: toggleHeight,
-                                    padding: const EdgeInsets.all(
-                                      togglePadding,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: toggleInactiveColor,
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        AnimatedAlign(
-                                          duration: toggleAnimation,
-                                          curve: Curves.easeInOut,
-                                          alignment: isGrid
-                                              ? Alignment.centerLeft
-                                              : Alignment.centerRight,
-                                          child: Container(
-                                            width: toggleSegmentWidth,
-                                            decoration: BoxDecoration(
-                                              color: toggleActiveColor,
-                                              borderRadius:
-                                                  BorderRadius.circular(999),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      ref
+                                          .read(
+                                            marketplaceViewModeProvider.notifier,
+                                          )
+                                          .state = isGrid
+                                          ? MarketplaceViewMode.list
+                                          : MarketplaceViewMode.grid;
+                                    },
+                                    child: AnimatedContainer(
+                                      duration: toggleAnimation,
+                                      width: toggleWidth,
+                                      height: toggleHeight,
+                                      padding: const EdgeInsets.all(
+                                        togglePadding,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: toggleInactiveColor,
+                                        borderRadius:
+                                            BorderRadius.circular(999),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          AnimatedAlign(
+                                            duration: toggleAnimation,
+                                            curve: Curves.easeInOut,
+                                            alignment: isGrid
+                                                ? Alignment.centerLeft
+                                                : Alignment.centerRight,
+                                            child: Container(
+                                              width: toggleSegmentWidth,
+                                              decoration: BoxDecoration(
+                                                color: toggleActiveColor,
+                                                borderRadius:
+                                                    BorderRadius.circular(999),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            SizedBox(
-                                              width: toggleSegmentWidth,
-                                              child: Center(
-                                                child: Icon(
-                                                  Icons.grid_view_rounded,
-                                                  size: toggleIconSize,
-                                                  color: isGrid
-                                                      ? toggleActiveIconColor
-                                                      : toggleInactiveIconColor,
+                                          Row(
+                                            children: [
+                                              SizedBox(
+                                                width: toggleSegmentWidth,
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons.grid_view_rounded,
+                                                    size: toggleIconSize,
+                                                    color: isGrid
+                                                        ? toggleActiveIconColor
+                                                        : toggleInactiveIconColor,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            SizedBox(
-                                              width: toggleSegmentWidth,
-                                              child: Center(
-                                                child: Icon(
-                                                  Icons.view_list_rounded,
-                                                  size: toggleIconSize,
-                                                  color: isGrid
-                                                      ? toggleInactiveIconColor
-                                                      : toggleActiveIconColor,
+                                              SizedBox(
+                                                width: toggleSegmentWidth,
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons.view_list_rounded,
+                                                    size: toggleIconSize,
+                                                    color: isGrid
+                                                        ? toggleInactiveIconColor
+                                                        : toggleActiveIconColor,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
