@@ -6,6 +6,7 @@ class CommunityComment {
     required this.authorName,
     required this.content,
     required this.createdAt,
+    this.score = 0,
     this.authorAvatarUrl,
     this.authorRole,
     this.parentId,
@@ -17,6 +18,7 @@ class CommunityComment {
   final String authorName;
   final String content;
   final DateTime createdAt;
+  final int score;
   final String? authorAvatarUrl;
   final String? authorRole;
   final String? parentId;
@@ -31,6 +33,11 @@ class CommunityComment {
         ? DateTime.parse(createdAtValue)
         : (createdAtValue as DateTime?) ?? DateTime.now();
 
+    final scoreValue = json['score'] ?? json['upvotes'] ?? json['vote_count'];
+    final score = scoreValue is num
+        ? scoreValue.toInt()
+        : int.tryParse(scoreValue?.toString() ?? '') ?? 0;
+
     return CommunityComment(
       id: (json['id'] ?? '').toString(),
       postId: (json['post_id'] ?? '').toString(),
@@ -43,6 +50,7 @@ class CommunityComment {
       authorRole: profile?['role']?.toString(),
       content: (json['content'] ?? '').toString(),
       createdAt: createdAt,
+      score: score,
     );
   }
 }

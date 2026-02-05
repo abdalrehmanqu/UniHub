@@ -75,9 +75,9 @@ class CommunityPostCard extends ConsumerWidget {
       ref.invalidate(communityFeedProvider);
       ref.invalidate(savedCommunityFeedProvider);
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete post: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to delete post: $error')));
     }
   }
 
@@ -198,8 +198,12 @@ class CommunityPostCard extends ConsumerWidget {
                             return SafeArea(
                               top: false,
                               child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                                padding: const EdgeInsets.fromLTRB(
+                                  20,
+                                  16,
+                                  20,
+                                  24,
+                                ),
                                 child: Wrap(
                                   spacing: 10,
                                   runSpacing: 8,
@@ -207,10 +211,11 @@ class CommunityPostCard extends ConsumerWidget {
                                     for (final tag in post.tags)
                                       Text(
                                         '#$tag',
-                                        style: theme.textTheme.labelSmall?.copyWith(
-                                          color: theme.colorScheme.primary,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                              color: theme.colorScheme.primary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                   ],
                                 ),
@@ -236,9 +241,10 @@ class CommunityPostCard extends ConsumerWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    showCommunityCommentsSheet(
-                      context: context,
-                      post: post,
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CommunityCommentsPage(post: post),
+                      ),
                     );
                   },
                   child: Row(

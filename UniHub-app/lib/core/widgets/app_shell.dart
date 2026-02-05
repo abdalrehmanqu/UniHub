@@ -88,163 +88,168 @@ class AppShell extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                  child: SizedBox(
-                    height: 44,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          height: 24,
-                          child: Image.network(
-                            'https://omrwuqfyiyixnpvvrywi.supabase.co/storage/v1/object/public/branding/unihub_icon_black_transparent.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            title,
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 21,
-                              color: theme.colorScheme.onBackground,
+                if (bottomNavVisible)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                    child: SizedBox(
+                      height: 44,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 24,
+                            child: Image.network(
+                              'https://omrwuqfyiyixnpvvrywi.supabase.co/storage/v1/object/public/branding/unihub_icon_black_transparent.png',
+                              fit: BoxFit.contain,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        if (isMarketplace ||
-                            showAdd ||
-                            showCommunityActions ||
-                            showFeedActions)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (showFeedActions)
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon:
-                                          const Icon(Icons.search_rounded),
-                                      onPressed: () {
-                                        context.push('/campus/search');
-                                      },
-                                      tooltip: 'Search',
-                                    ),
-                                    const SizedBox(width: 6),
-                                  ],
-                                ),
-                              if (showCommunityActions)
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon:
-                                          const Icon(Icons.search_rounded),
-                                      onPressed: () {
-                                        context.push('/community/search');
-                                      },
-                                      tooltip: 'Search',
-                                    ),
-                                    const SizedBox(width: 6),
-                                  ],
-                                ),
-                              if (isMarketplace)
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 6),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      ref
-                                          .read(
-                                            marketplaceViewModeProvider.notifier,
-                                          )
-                                          .state = isGrid
-                                          ? MarketplaceViewMode.list
-                                          : MarketplaceViewMode.grid;
-                                    },
-                                    child: AnimatedContainer(
-                                      duration: toggleAnimation,
-                                      width: toggleWidth,
-                                      height: toggleHeight,
-                                      padding: const EdgeInsets.all(
-                                        togglePadding,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 21,
+                                color: theme.colorScheme.onBackground,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (isMarketplace ||
+                              showAdd ||
+                              showCommunityActions ||
+                              showFeedActions)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (showFeedActions)
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.search_rounded),
+                                        onPressed: () {
+                                          context.push('/campus/search');
+                                        },
+                                        tooltip: 'Search',
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: toggleInactiveColor,
-                                        borderRadius:
-                                            BorderRadius.circular(999),
+                                      const SizedBox(width: 6),
+                                    ],
+                                  ),
+                                if (showCommunityActions)
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.search_rounded),
+                                        onPressed: () {
+                                          context.push('/community/search');
+                                        },
+                                        tooltip: 'Search',
                                       ),
-                                      child: Stack(
-                                        children: [
-                                          AnimatedAlign(
-                                            duration: toggleAnimation,
-                                            curve: Curves.easeInOut,
-                                            alignment: isGrid
-                                                ? Alignment.centerLeft
-                                                : Alignment.centerRight,
-                                            child: Container(
-                                              width: toggleSegmentWidth,
-                                              decoration: BoxDecoration(
-                                                color: toggleActiveColor,
-                                                borderRadius:
-                                                    BorderRadius.circular(999),
+                                      const SizedBox(width: 6),
+                                    ],
+                                  ),
+                                if (isMarketplace)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 6),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        ref
+                                            .read(
+                                              marketplaceViewModeProvider
+                                                  .notifier,
+                                            )
+                                            .state = isGrid
+                                            ? MarketplaceViewMode.list
+                                            : MarketplaceViewMode.grid;
+                                      },
+                                      child: AnimatedContainer(
+                                        duration: toggleAnimation,
+                                        width: toggleWidth,
+                                        height: toggleHeight,
+                                        padding: const EdgeInsets.all(
+                                          togglePadding,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: toggleInactiveColor,
+                                          borderRadius: BorderRadius.circular(
+                                            999,
+                                          ),
+                                        ),
+                                        child: Stack(
+                                          children: [
+                                            AnimatedAlign(
+                                              duration: toggleAnimation,
+                                              curve: Curves.easeInOut,
+                                              alignment: isGrid
+                                                  ? Alignment.centerLeft
+                                                  : Alignment.centerRight,
+                                              child: Container(
+                                                width: toggleSegmentWidth,
+                                                decoration: BoxDecoration(
+                                                  color: toggleActiveColor,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        999,
+                                                      ),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          Row(
-                                            children: [
-                                              SizedBox(
-                                                width: toggleSegmentWidth,
-                                                child: Center(
-                                                  child: Icon(
-                                                    Icons.grid_view_rounded,
-                                                    size: toggleIconSize,
-                                                    color: isGrid
-                                                        ? toggleActiveIconColor
-                                                        : toggleInactiveIconColor,
+                                            Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: toggleSegmentWidth,
+                                                  child: Center(
+                                                    child: Icon(
+                                                      Icons.grid_view_rounded,
+                                                      size: toggleIconSize,
+                                                      color: isGrid
+                                                          ? toggleActiveIconColor
+                                                          : toggleInactiveIconColor,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              SizedBox(
-                                                width: toggleSegmentWidth,
-                                                child: Center(
-                                                  child: Icon(
-                                                    Icons.view_list_rounded,
-                                                    size: toggleIconSize,
-                                                    color: isGrid
-                                                        ? toggleInactiveIconColor
-                                                        : toggleActiveIconColor,
+                                                SizedBox(
+                                                  width: toggleSegmentWidth,
+                                                  child: Center(
+                                                    child: Icon(
+                                                      Icons.view_list_rounded,
+                                                      size: toggleIconSize,
+                                                      color: isGrid
+                                                          ? toggleInactiveIconColor
+                                                          : toggleActiveIconColor,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              if (showAdd)
-                                IconButton(
-                                  icon:
-                                      const Icon(Icons.add_rounded, size: 28),
-                                  onPressed: () {
-                                    if (isCampus) {
-                                      context.push('/campus/create');
-                                    } else if (isCommunity) {
-                                      context.push('/community/create');
-                                    }
-                                  },
-                                  tooltip: 'Create',
-                                  color: theme.colorScheme.primary,
-                                ),
-                            ],
-                          ),
-                      ],
+                                if (showAdd)
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.add_rounded,
+                                      size: 28,
+                                    ),
+                                    onPressed: () {
+                                      if (isCampus) {
+                                        context.push('/campus/create');
+                                      } else if (isCommunity) {
+                                        context.push('/community/create');
+                                      }
+                                    },
+                                    tooltip: 'Create',
+                                    color: theme.colorScheme.primary,
+                                  ),
+                              ],
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
                 Expanded(child: child),
               ],
             ),
@@ -272,7 +277,8 @@ class AppShell extends ConsumerWidget {
                     selectedIndex: currentIndex,
                     onDestinationSelected: (index) =>
                         _onDestinationSelected(context, index),
-                    labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+                    labelBehavior:
+                        NavigationDestinationLabelBehavior.alwaysHide,
                     destinations: const [
                       NavigationDestination(
                         icon: Icon(Icons.home_filled),
